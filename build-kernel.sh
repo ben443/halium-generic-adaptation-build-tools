@@ -11,6 +11,7 @@ KERNEL_DIR="${KERNEL_DIR%.git}"
 OUT="${TMPDOWN}/KERNEL_OBJ"
 
 mkdir -p "$OUT"
+mkdir -p "$INSTALL_MOD_PATH/usr"
 
 case "$deviceinfo_arch" in
     aarch64*) ARCH="arm64" ;;
@@ -32,7 +33,7 @@ fi
 cd "$KERNEL_DIR"
 make O="$OUT" $deviceinfo_kernel_defconfig
 make O="$OUT" $MAKEOPTS -j$(nproc --all)
-make O="$OUT" $MAKEOPTS INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="$INSTALL_MOD_PATH" modules_install
+make O="$OUT" $MAKEOPTS INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="$INSTALL_MOD_PATH/usr" modules_install
 ls "$OUT/arch/$ARCH/boot/"*Image*
 
 if [ -n "$deviceinfo_kernel_apply_overlay" ] && $deviceinfo_kernel_apply_overlay; then
