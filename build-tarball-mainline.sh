@@ -17,8 +17,9 @@ if [ "$usrmerge" = "true" ]; then
     # make sure udev rules and kernel modules are installed into /usr/lib
     # as /lib is symlink to /usr/lib on focal+
     if [ -d system/lib ]; then
-        mkdir -p system/usr
-        mv system/lib system/usr/
+        mkdir -p system/usr/lib/
+        mv system/lib/* system/usr/lib/
+        rmdir system/lib
     fi
 fi
 
