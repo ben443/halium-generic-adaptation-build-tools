@@ -18,8 +18,9 @@ if [ "$mode" = "usrmerge" ]; then
     # as /lib is symlink to /usr/lib on focal+
     # https://wiki.debian.org/UsrMerge
     if [ -d system/lib ]; then
-        mkdir -p system/usr
-        mv system/lib system/usr/
+        mkdir -p system/usr/lib/
+        mv system/lib/* system/usr/lib/
+        rmdir system/lib
     fi
 elif [ "$mode" = "overlaystore" ]; then
     cd "$dir"
