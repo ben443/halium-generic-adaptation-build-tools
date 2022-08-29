@@ -33,5 +33,7 @@ fi
 output_name=device_"$device"
 [ "$mode" = "usrmerge" ] && output_name=device_"$device"_usrmerge
 
-tar -cJf "$output/$output_name.tar.xz" -C "$dir" partitions/ system/
+tar -cJf "$output/$output_name.tar.xz" -C "$dir" \
+    --owner=root --group=root \
+    partitions/ system/
 echo "$(date +%Y%m%d)-$RANDOM" > "$output/$output_name.tar.build"
