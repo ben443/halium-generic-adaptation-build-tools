@@ -110,6 +110,10 @@ if [ "$deviceinfo_bootimg_header_version" -eq 2 ]; then
     EXTRA_ARGS+=" --dtb $DTB --dtb_offset $deviceinfo_flash_offset_dtb"
 fi
 
+if [ "$deviceinfo_bootimg_header_version" -eq 3 ]; then
+    EXTRA_ARGS+=" --base $deviceinfo_flash_offset_base --kernel_offset $deviceinfo_flash_offset_kernel --ramdisk_offset $deviceinfo_flash_offset_ramdisk"
+fi
+
 if [ -n "$deviceinfo_bootimg_board" ]; then
     EXTRA_ARGS+=" --board $deviceinfo_bootimg_board"
 fi
@@ -134,6 +138,10 @@ fi
 if [ -n "$deviceinfo_has_recovery_partition" ] && $deviceinfo_has_recovery_partition; then
     RECOVERY="$(dirname "$OUT")/recovery.img"
     EXTRA_ARGS=""
+
+    if [ "$deviceinfo_bootimg_header_version" -eq 3 ]; then
+        EXTRA_ARGS+=" --header_version $deviceinfo_bootimg_header_version"
+    fi
 
     if [ "$deviceinfo_bootimg_header_version" -eq 2 ]; then
         EXTRA_ARGS+=" --header_version $deviceinfo_bootimg_header_version --dtb $DTB --dtb_offset $deviceinfo_flash_offset_dtb"
