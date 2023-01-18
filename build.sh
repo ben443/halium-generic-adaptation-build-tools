@@ -48,20 +48,14 @@ case $deviceinfo_arch in
 esac
 
 cd "$TMPDOWN"
-    [ -d aarch64-linux-android-4.9 ] || git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 -b pie-gsi --depth 1
-    GCC_PATH="$TMPDOWN/aarch64-linux-android-4.9"
-    if $deviceinfo_kernel_clang_compile; then
-        [ -d linux-x86 ] || git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b android11-gsi --depth 1
-        CLANG_PATH="$TMPDOWN/linux-x86/clang-r383902"
-        rm -rf "$TMPDOWN/linux-x86/.git" "$TMPDOWN/linux-x86/"!(clang-r383902)
-    fi
-    if [ "$deviceinfo_arch" == "aarch64" ]; then
-        [ -d arm-linux-androideabi-4.9 ] || git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 -b pie-gsi --depth 1
-        GCC_ARM32_PATH="$TMPDOWN/arm-linux-androideabi-4.9"
-    fi
     KERNEL_DIR="$(basename "${deviceinfo_kernel_source}")"
     KERNEL_DIR="${KERNEL_DIR%.*}"
-    [ -d "$KERNEL_DIR" ] || git clone "$deviceinfo_kernel_source" -b $deviceinfo_kernel_source_branch --depth 1
+    GCC_PATH="$TMPDOWN/android-kernel/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-gnu-6.4.1"
+    if [ ! -d android-kernel ]; then
+               mkdir android-kernel && cd android-kernel
+               repo init -u https://gitlab.azka.li/l4t-community/ubtouch/manifest -b $deviceinfo_kernel_source_branch
+               repo sync -j$(nproc)
+    fi
 
     [ -f halium-boot-ramdisk.img ] || curl --location --output halium-boot-ramdisk.img \
         "https://github.com/Halium/initramfs-tools-halium/releases/download/dynparts/initrd.img-touch-${RAMDISK_ARCH}"
@@ -80,6 +74,14 @@ cd "$TMPDOWN"
 
     if [ ! -f "vbmeta.img" ] && [ -n "$deviceinfo_bootimg_append_vbmeta" ] && $deviceinfo_bootimg_append_vbmeta; then
         wget https://dl.google.com/developers/android/qt/images/gsi/vbmeta.img
+    fi
+
+    if [ ! -f "mkdtimg" ]; then
+	wget https://android.googlesource.com/platform/system/libufdt/+archive/refs/heads/master/utils.tar.gz
+	tar xvf utils.tar.gz
+	cp src/mkdtboimg.py mkdtimg
+	chmod a+x mkdtimg
+	rm -rf utils.tar.gz tests src README.md
     fi
 
     ls .
@@ -102,7 +104,7 @@ if $deviceinfo_kernel_clang_compile; then
     PATH="$CLANG_PATH/bin:$GCC_PATH/bin:$GCC_ARM32_PATH/bin:${PATH}" \
     "$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system"
 else
-    PATH="$GCC_PATH/bin:$GCC_ARM32_PATH/bin:${PATH}" \
+    PATH="$GCC_PATH/bin:$GCC_ARM32_PATH/bin:$TMPDOWN:${PATH}" \
     "$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system"
 fi
 
@@ -112,7 +114,7 @@ elif [ -n "$deviceinfo_dtbo" ]; then
     "$SCRIPT/make-dtboimage.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMP}/partitions/dtbo.img"
 fi
 
-"$SCRIPT/make-bootimage.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMPDOWN}/halium-boot-ramdisk.img" "${TMP}/partitions/boot.img"
+"$SCRIPT/make-bootimage.sh" "${TMPDOWN}" "${TMPDOWN}/android-kernel/kernel/nvidia/kernel-4.9-icosa/" "${TMPDOWN}/halium-boot-ramdisk.img" "${TMP}/partitions/boot.img"
 
 cp -av overlay/* "${TMP}/"
 
