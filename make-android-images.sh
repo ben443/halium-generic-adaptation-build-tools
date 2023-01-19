@@ -12,18 +12,16 @@ mkdir -p "$TMPDOWN/mount"
 if [ ! -d "$HALIUM" ]; then
 	mkdir -p "$HALIUM"
 	cd "$HALIUM"
-	repo init -u https://github.com/Halium/android -b deviceinfo_kernel_source_branch --depth=1
-	git clone https://gitlab.azka.li/l4t-community/ubtouch/manifest.git --recursive -b deviceinfo_kernel_source_branch .repo/local_manifests
-	wget -O halium/devices/nintendo_icosa_sr.xml https://gitlab.azka.li/l4t-community/ubtouch/manifest/-/raw/deviceinfo_kernel_source_branch/default.xml
-	./halium/devices/setup icosa_sr
+	repo init -u https://github.com/Halium/android -b $deviceinfo_kernel_source_branch --depth=1
+	git clone https://gitlab.azka.li/l4t-community/ubtouch/manifest.git --recursive -b $deviceinfo_kernel_source_branch .repo/local_manifests
+	wget -O halium/devices/nintendo_icosa_sr.xml https://gitlab.azka.li/l4t-community/ubtouch/manifest/-/raw/$deviceinfo_kernel_source_branch/default.xml
+	./halium/devices/setup $deviceinfo_android_target
 	./.repo/local_manifests/snack/snack.sh -y -p -w
 	hybris-patches/apply-patches.sh --mb
 else
 	cd "$HALIUM"
-#	repo sync -c -j$(nproc)
-#       wget -O halium/devices/nintendo_icosa_sr.xml https://gitlab.azka.li/l4t-community/ubtouch/manifest/-/raw/halium-10.0/default.xml
-#       ./halium/devices/setup icosa_sr
-#       hybris-patches/apply-patches.sh --mb
+	./.repo/local_manifests/snack/snack.sh -y -p
+	hybris-patches/apply-patches.sh --mb
 fi
 
 # Prepare 
