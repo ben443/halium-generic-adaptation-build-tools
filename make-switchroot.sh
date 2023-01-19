@@ -68,7 +68,7 @@ cp "$ASSETS/L4T-UTF.ini" "$OUT/bootloader/ini/"
 cp "$ASSETS/bl31.bin" "$ASSETS/bl33.bin" "$OUT/switchroot/ut_focal/"
 mkimage -A arm64 -T script -d "$ASSETS/boot.txt" "$OUT/switchroot/ut_focal/boot.scr"
 mkimage -A arm64 -O linux -T ramdisk -C gzip -d "$RAMDISK" "$OUT/switchroot/ut_focal/initramfs"
-mkimage -A arm64 -O linux -T kernel -C gzip -a 0x80200000 -e 0x80200000 -n "AZKRN-5.0.0" -d "$KERNEL/arch/$ARCH/boot/$deviceinfo_kernel_image_name" "$OUT/switchroot/ut_focal/uImage"
+mkimage -A arm64 -O linux -T kernel -C gzip -a 0x80200000 -e 0x80200000 -n "AZKRN-5.0.0" -d "$KERNEL_OBJ/arch/$ARCH/boot/$deviceinfo_kernel_image_name" "$OUT/switchroot/ut_focal/uImage"
 "$TMPDOWN/mkdtimg" create "$OUT/switchroot/ut_focal/nx-plat.dtimg" --page_size=1000 "$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210-icosa.dtb" --id=0x4F44494E
 #       "$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210-odin.dtb"    --id=0x4F44494E \
 #	"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210b01-odin.dtb" --id=0x4F44494E --rev=0xb01 \
