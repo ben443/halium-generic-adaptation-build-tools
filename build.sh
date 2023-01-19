@@ -50,13 +50,9 @@ esac
 cd "$TMPDOWN"
     KERNEL_DIR="$(basename "${deviceinfo_kernel_source}")"
     KERNEL_DIR="${KERNEL_DIR%.*}"
-    GCC_PATH="$TMPDOWN/android-kernel/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-gnu-6.4.1/"
-    GCC32_PATH="$TMPDOWN/android-kernel/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/"
-    if [ ! -d android-kernel ]; then
-               mkdir android-kernel && cd android-kernel
-               repo init -u https://gitlab.azka.li/l4t-community/ubtouch/manifest -b $deviceinfo_kernel_source_branch
-               repo sync -j$(nproc)
-    fi
+
+    GCC_PATH="$TMPDOWN/halium/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-gnu-6.4.1/"
+    GCC32_PATH="$TMPDOWN/halium/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/"
 
     if [ ! -f "mkdtimg" ]; then
 	wget https://android.googlesource.com/platform/system/libufdt/+archive/refs/heads/master/utils.tar.gz
@@ -96,8 +92,10 @@ if [ -n "$deviceinfo_kernel_use_dtc_ext" ] && $deviceinfo_kernel_use_dtc_ext; th
     export DTC_EXT="$TMPDOWN/dtc_ext"
 fi
 
+"$SCRIPT/make-android-images.sh" "$TMPDOWN/halium"
+
 PATH="$GCC_PATH/bin:$GC32_PATH/bin:$TMPDOWN:${PATH}" \
-"$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system"
+"$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system" "${TMPDOWN}/halium/kernel/nvidia/linux-4.9_icosa/kernel/kernel-4.9"
 
 if [ -n "$deviceinfo_prebuilt_dtbo" ]; then
     cp "$deviceinfo_prebuilt_dtbo" "${TMP}/partitions/dtbo.img"
@@ -105,7 +103,11 @@ elif [ -n "$deviceinfo_dtbo" ]; then
     "$SCRIPT/make-dtboimage.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMP}/partitions/dtbo.img"
 fi
 
-"$SCRIPT/make-bootimage.sh" "${TMPDOWN}" "${TMPDOWN}/android-kernel/kernel/nvidia/linux-4.9_icosa/kernel/kernel-4.9/" "${TMPDOWN}/halium-boot-ramdisk.img" "${TMP}/partitions/boot.img"
+if [ -n "$deviceinfo_kernel_uimage" ]; then
+	"$SCRIPT/make-switchroot.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMPDOWN}/halium-boot-ramdisk.img" "${TMP}" "$HERE/assets/"
+else
+	"$SCRIPT/make-bootimage.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMPDOWN}/halium-boot-ramdisk.img" "${TMP}/partitions/boot.img"
+fi
 
 cp -av overlay/* "${TMP}/"
 

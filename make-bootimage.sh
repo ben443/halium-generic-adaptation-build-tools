@@ -60,7 +60,7 @@ if [ -d "$HERE/ramdisk-overlay" ]; then
 fi
 
 if [ -n "$deviceinfo_kernel_image_name" ]; then
-    KERNEL="$KERNEL_OBJ/out/arch/$ARCH/boot/$deviceinfo_kernel_image_name"
+    KERNEL="$KERNEL_OBJ/arch/$ARCH/boot/$deviceinfo_kernel_image_name"
 else
     # Autodetect kernel image name for boot.img
     if [ "$deviceinfo_bootimg_header_version" -eq 2 ]; then
