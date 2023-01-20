@@ -83,7 +83,7 @@ cd "$TMPDOWN"
     fi
 
     [ -f "${ROOTFS_URL##*/}" ] || wget $ROOTFS_URL
-    [ -d halium-install ] || git clone https://gitlab.com/JBBgameich/halium-install
+    [ -d halium-install ] || git clone https://gitlab.com/Azkali/halium-install
 
     ls .
 cd "$HERE"
