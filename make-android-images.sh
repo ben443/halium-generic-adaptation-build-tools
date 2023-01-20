@@ -13,8 +13,9 @@ if [ ! -d "$HALIUM" ]; then
 	mkdir -p "$HALIUM"
 	cd "$HALIUM"
 	repo init -u https://github.com/Halium/android -b $deviceinfo_android_branch --depth=1
+	repo sync -j$(nproc)
 	git clone https://gitlab.azka.li/l4t-community/ubtouch/manifest.git --recursive -b $deviceinfo_android_branch .repo/local_manifests
-	wget -O halium/devices/nintendo_icosa_sr.xml https://gitlab.azka.li/l4t-community/ubtouch/manifest/-/raw/$deviceinfo_android_branch/default.xml
+	wget -O ./halium/devices/nintendo_icosa_sr.xml https://gitlab.azka.li/l4t-community/ubtouch/manifest/-/raw/$deviceinfo_android_branch/default.xml
 	./halium/devices/setup $deviceinfo_android_target
 	./.repo/local_manifests/snack/snack.sh -y -p -w
 	hybris-patches/apply-patches.sh --mb
