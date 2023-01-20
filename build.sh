@@ -2,6 +2,7 @@
 set -xe
 shopt -s extglob
 
+ROOTFS_URL=${ROOTFS_URL:-'https://ci.ubports.com/job/focal-hybris-rootfs-arm64/job/master/lastSuccessfulBuild/artifact/ubuntu-touch-android9plus-rootfs-arm64.tar.gz'}
 BUILD_DIR=
 OUT=
 
@@ -81,6 +82,9 @@ cd "$TMPDOWN"
         wget https://dl.google.com/developers/android/qt/images/gsi/vbmeta.img
     fi
 
+    [ -f "${ROOTFS_URL##*/}" ] || wget $ROOTFS_URL
+    [ -d halium-install ] || git clone https://gitlab.com/JBBgameich/halium-install
+
     ls .
 cd "$HERE"
 
@@ -102,6 +106,8 @@ if [ -n "$deviceinfo_prebuilt_dtbo" ]; then
 elif [ -n "$deviceinfo_dtbo" ]; then
     "$SCRIPT/make-dtboimage.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMP}/partitions/dtbo.img"
 fi
+
+"$TMPDOWN/halium-install/halium-install" -u phablet -p phablet -l "${TMP}/partitions/" -p ut20.04 -s "${TMPDOWN}/${ROOTFS_URL##*/}" "${TMPDOWN}/halium/out/target/product/$deviceinfo_android_target/system.img"
 
 if [ -n "$deviceinfo_kernel_uimage" ]; then
 	"$SCRIPT/make-switchroot.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMPDOWN}/halium-boot-ramdisk.img" "${TMP}" "$HERE/assets/"

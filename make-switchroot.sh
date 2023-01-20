@@ -7,6 +7,13 @@ RAMDISK=$(realpath $3)
 OUT=$(realpath $4)
 ASSETS=$(realpath $5)
 
+if [ -z "$TMPDOWN" ]; then
+    TMPMOUNT=$(mktemp -d)
+else
+    TMPMOUNT="$TMPDOWN/uda/"
+    mkdir -p "$TMPMOUNT"
+fi
+
 HERE=$(pwd)
 source "${HERE}/deviceinfo"
 
@@ -69,8 +76,37 @@ cp "$ASSETS/bl31.bin" "$ASSETS/bl33.bin" "$OUT/switchroot/ut_focal/"
 mkimage -A arm64 -T script -d "$ASSETS/boot.txt" "$OUT/switchroot/ut_focal/boot.scr"
 mkimage -A arm64 -O linux -T ramdisk -C gzip -d "$RAMDISK" "$OUT/switchroot/ut_focal/initramfs"
 mkimage -A arm64 -O linux -T kernel -C gzip -a 0x80200000 -e 0x80200000 -n "AZKRN-5.0.0" -d "$KERNEL_OBJ/arch/$ARCH/boot/$deviceinfo_kernel_image_name" "$OUT/switchroot/ut_focal/uImage"
-"$TMPDOWN/mkdtimg" create "$OUT/switchroot/ut_focal/nx-plat.dtimg" --page_size=1000 "$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210-icosa.dtb" --id=0x4F44494E
-#       "$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210-odin.dtb"    --id=0x4F44494E \
-#	"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210b01-odin.dtb" --id=0x4F44494E --rev=0xb01 \
-#	"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210b01-vali.dtb" --id=0x56414C49 \
-#	"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210b01-frig.dtb" --id=0x46524947
+
+if [ "$deviceinfo_bootimg_os_version" == "10" ]; then
+	"$TMPDOWN/mkdtimg" create "$OUT/switchroot/ut_focal/nx-plat.dtimg" --page_size=1000 "$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210-icosa.dtb" --id=0x4F44494E
+else
+	"$TMPDOWN/mkdtimg" create "$OUT/switchroot/ut_focal/nx-plat.dtimg" --page_size=1000 \
+		"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210-odin.dtb"    --id=0x4F44494E \
+		"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210b01-odin.dtb" --id=0x4F44494E --rev=0xb01 \
+		"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210b01-vali.dtb" --id=0x56414C49 \
+		"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210b01-frig.dtb" --id=0x46524947
+fi
+
+UT_ROOTFS_SIZE=$(du -MB "$OUT/partitions/rootfs.img" | awk -F "M" "{print $1}")
+SYSTEM_SIZE=$(du -MB "$OUT/partitions/android-rootfs.img" | awk -F "M" "{print $1}")
+VENDOR_SIZE=$(du -MB "$TMPDOWN/halium/out/target/product/$deviceinfo_android_target/vendor.img" | awk -F "M" "{print $1}")
+UDA_TOTAL_SIZE=(($UT_ROOTFS_SIZE + $SYSTEM_SIZE + $VENDOR_SIZE + 256))
+
+dd if=/dev/zero of="$OUT/partitions/uda.img" iflag=fullblock bs=1M count=$UDA_TOTAL_SIZE
+sync
+mkfs.ext4 -F "$OUT/partitions/uda.img"
+e2label "$OUT/partitions/uda.img" "UDA"
+zerofree "$OUT/partitions/rootfs.img"
+
+mount "$OUT/partitions/uda.img" "$TMPMOUNT"
+cp "$OUT/partitions/rootfs.img" \
+	"$OUT/partitions/android-rootfs.img" \
+	"$TMPDOWN/halium/out/target/product/$deviceinfo_android_target/vendor.img" \
+	"$TMPMOUNT"
+umount "$TMPMOUNT"
+
+zerofree "$OUT/partitions/uda.img"
+split -b4290772992 --numeric-suffixes=0 "$OUT/partitions/uda.img" "$OUT/switchroot/install/l4t."
+
+cd $OUT
+7z a ../switch-ubuntu-touch-focal.7z bootloader switchroot

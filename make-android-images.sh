@@ -33,17 +33,6 @@ mka e2fsdroid
 mka systemimage
 mka vendorimage
 
-# Add vendor.img size to system.img before copying
-TOTAL_SIZE_ADDED=(($(du -BM "$HALIUM/out/target/product/$deviceinfo_android_target/vendor.img" | awk -F "M" '{print $1}') + 2))
-dd if=/dev/zero bs=1M count=$TOTAL_SIZE_ADDED >> "$HALIUM/out/target/product/$deviceinfo_android_target/system.img"
-
-# Resize partition on disk
-e2fsck -f "$HALIUM/out/target/product/$deviceinfo_android_target/system.img"
-resize2fs "$HALIUM/out/target/product/$deviceinfo_android_target/system.img"
-
-# Mount system, copy vendor to system, unmount system
-mount "$HALIUM/out/target/product/$deviceinfo_android_target/system.img" "$TMPDOWN/mount"
-cp "$HALIUM/out/target/product/$deviceinfo_android_target/vendor.img" "$TMPDOWN/mount/"
-umount "$TMPDOWN/mount"
-
-# TODO: copy vendor image inside system.img
+cp "$HALIUM/out/target/product/$deviceinfo_android_target/vendor.img" \
+	"$HALIUM/out/target/product/$deviceinfo_android_target/system.img" \
+	"$TMPDOWN/partitions"
