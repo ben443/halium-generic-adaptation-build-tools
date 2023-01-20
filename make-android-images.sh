@@ -36,6 +36,6 @@ mka e2fsdroid
 mka systemimage
 mka vendorimage
 
-cp "$HALIUM/out/target/product/$deviceinfo_android_target/vendor.img" \
+mv "$HALIUM/out/target/product/$deviceinfo_android_target/vendor.img" \
 	"$HALIUM/out/target/product/$deviceinfo_android_target/system.img" \
 	"$TMPDOWN/partitions"
