@@ -24,6 +24,9 @@ else
 	hybris-patches/apply-patches.sh --mb
 fi
 
+# HACK: replace defconfig by deviceinfo one
+sed -i 's/TARGET_KERNEL_CONFIG.*$/TARGET_KERNEL_CONFIG := '$deviceinfo_kernel_defconfig'/g' ./device/$deviceinfo_manufacturer/$deviceinfo_android_target/BoardConfig.mk
+
 # Prepare 
 source build/envsetup.sh
 breakfast $deviceinfo_android_target
