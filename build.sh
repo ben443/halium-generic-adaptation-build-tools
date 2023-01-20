@@ -96,7 +96,7 @@ if [ -n "$deviceinfo_kernel_use_dtc_ext" ] && $deviceinfo_kernel_use_dtc_ext; th
     export DTC_EXT="$TMPDOWN/dtc_ext"
 fi
 
-"$SCRIPT/make-android-images.sh" "$TMPDOWN/halium"
+"$SCRIPT/make-android-images.sh" "$TMPDOWN/halium" "${TMP}"
 
 PATH="$GCC_PATH/bin:$GC32_PATH/bin:$TMPDOWN:${PATH}" \
 "$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system" "${TMPDOWN}/halium/kernel/nvidia/linux-4.9_icosa/kernel/kernel-4.9"
