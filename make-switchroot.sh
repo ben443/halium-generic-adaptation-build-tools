@@ -87,24 +87,14 @@ else
 		"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210b01-frig.dtb" --id=0x46524947
 fi
 
-UT_ROOTFS_SIZE=$(du -MB "$OUT/partitions/rootfs.img" | awk -F "M" "{print $1}")
-SYSTEM_SIZE=$(du -MB "$OUT/partitions/android-rootfs.img" | awk -F "M" "{print $1}")
-VENDOR_SIZE=$(du -MB "$TMPDOWN/halium/out/target/product/$deviceinfo_android_target/vendor.img" | awk -F "M" "{print $1}")
-UDA_TOTAL_SIZE=(($UT_ROOTFS_SIZE + $SYSTEM_SIZE + $VENDOR_SIZE + 256))
-
-dd if=/dev/zero of="$OUT/partitions/uda.img" iflag=fullblock bs=1M count=$UDA_TOTAL_SIZE
-sync
-mkfs.ext4 -F "$OUT/partitions/uda.img"
-e2label "$OUT/partitions/uda.img" "UDA"
 zerofree "$OUT/partitions/rootfs.img"
 
-mount "$OUT/partitions/uda.img" "$TMPMOUNT"
-cp "$OUT/partitions/rootfs.img" \
-	"$OUT/partitions/android-rootfs.img" \
-	"$TMPDOWN/halium/out/target/product/$deviceinfo_android_target/vendor.img" \
-	"$TMPMOUNT"
-umount "$TMPMOUNT"
+mv "$OUT/partitions/rootfs.img" \
+        "$OUT/partitions/android-rootfs.img" \
+        "$TMPDOWN/halium/out/target/product/$deviceinfo_android_target/vendor.img" \
+        "$TMPMOUNT"
 
+virt-make-fs --size=+256M -t ext4 --label "UDA" "$TMPMOUNT" "$OUT/partitions/uda.img"
 zerofree "$OUT/partitions/uda.img"
 split -b4290772992 --numeric-suffixes=0 "$OUT/partitions/uda.img" "$OUT/switchroot/install/l4t."
 
