@@ -110,3 +110,7 @@ split -b4290772992 --numeric-suffixes=0 "$OUT/partitions/uda.img" "$OUT/switchro
 
 cd $OUT
 7z a ../switch-ubuntu-touch-focal.7z bootloader switchroot
+
+echo "Cleaning up"
+rm -rf "$OUT/partitions" "$OUT/switchroot" "$OUT/bootloader" "$OUT/system"
+echo "Creating Ubuntu touch rootfs done !"
