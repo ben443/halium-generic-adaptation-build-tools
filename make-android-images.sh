@@ -36,5 +36,6 @@ lunch lineage_${deviceinfo_android_target}-userdebug
 mka kernel
 mka e2fsdroid
 mka systemimage
-mka vendorimage
+mka vendorimage || true
+mka vendorimage # Trigger again, cause sometimes it will fail
 simg2img "$HALIUM/out/target/product/$deviceinfo_android_target/vendor.img" "$TMPDOWN/partitions/vendor.img"
