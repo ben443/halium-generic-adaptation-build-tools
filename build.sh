@@ -107,7 +107,7 @@ elif [ -n "$deviceinfo_dtbo" ]; then
     "$SCRIPT/make-dtboimage.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMP}/partitions/dtbo.img"
 fi
 
-"$TMPDOWN/halium-install/halium-install" -u phablet -p phablet -l -o "${TMP}/partitions/" -p ut20.04 -s "${TMPDOWN}/${ROOTFS_URL##*/}" "${TMPDOWN}/halium/out/target/product/$deviceinfo_android_target/system.img"
+"$TMPDOWN/halium-install/halium-install" -u phablet -l -o "${TMP}/partitions/" -p ut20.04 -s "${TMPDOWN}/${ROOTFS_URL##*/}" "${TMPDOWN}/halium/out/target/product/$deviceinfo_android_target/system.img"
 
 if [ -n "$deviceinfo_kernel_uimage" ]; then
 	"$SCRIPT/make-switchroot.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMPDOWN}/halium-boot-ramdisk.img" "${TMP}" "$HERE/assets/"
