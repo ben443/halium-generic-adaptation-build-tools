@@ -88,12 +88,7 @@ else
 fi
 
 zerofree "$OUT/partitions/rootfs.img"
-
-mv "$OUT/partitions/rootfs.img" \
-        "$OUT/partitions/android-rootfs.img" \
-        "$TMPDOWN/halium/out/target/product/$deviceinfo_android_target/vendor.img" \
-        "$TMPMOUNT"
-
+mv "$OUT/partitions/rootfs.img" "$OUT/partitions/android-rootfs.img" "$TMPDOWN/partitions/vendor.img" "$TMPMOUNT"
 virt-make-fs --size=+256M -t ext4 --label "UDA" "$TMPMOUNT" "$OUT/partitions/uda.img"
 zerofree "$OUT/partitions/uda.img"
 split -b4290772992 --numeric-suffixes=0 "$OUT/partitions/uda.img" "$OUT/switchroot/install/l4t."
