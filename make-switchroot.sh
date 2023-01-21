@@ -97,5 +97,5 @@ cd $OUT
 7z a ../switch-ubuntu-touch-focal.7z bootloader switchroot
 
 echo "Cleaning up"
-rm -rf "$OUT/partitions" "$OUT/switchroot" "$OUT/bootloader" "$OUT/system" "$TMPDOWN/uda"
+rm -rf "$OUT" "$TMPMOUNT"
 echo "Creating Ubuntu touch rootfs done !"
