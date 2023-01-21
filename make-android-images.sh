@@ -33,6 +33,7 @@ source build/envsetup.sh
 breakfast $deviceinfo_android_target
 
 # Build
+mka kernel
 mka e2fsdroid
 mka systemimage
 mka vendorimage
