@@ -30,7 +30,7 @@ sed -i 's/TARGET_KERNEL_CONFIG.*$/TARGET_KERNEL_CONFIG := '$deviceinfo_kernel_de
 
 # Prepare
 source build/envsetup.sh
-breakfast $deviceinfo_android_target
+lunch lineage_${deviceinfo_android_target}-userdebug
 
 # Build
 mka kernel
