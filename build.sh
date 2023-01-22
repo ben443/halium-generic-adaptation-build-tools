@@ -99,7 +99,7 @@ fi
 "$SCRIPT/make-android-images.sh" "$TMPDOWN/halium" "${TMP}"
 
 PATH="$GCC_PATH/bin:$GC32_PATH/bin:$TMPDOWN:${PATH}" \
-"$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system" "${TMPDOWN}/halium/kernel/nvidia/linux-4.9_icosa/kernel/kernel-4.9"
+"$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system" "${TMPDOWN}/halium/kernel/$deviceinfo_android_kernel_path"
 
 if [ -n "$deviceinfo_prebuilt_dtbo" ]; then
     cp "$deviceinfo_prebuilt_dtbo" "${TMP}/partitions/dtbo.img"
