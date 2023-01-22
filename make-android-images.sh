@@ -36,6 +36,6 @@ lunch lineage_${deviceinfo_android_target}-userdebug
 mka kernel
 mka e2fsdroid
 mka systemimage
-mka vendorimage || true
-mka vendorimage # Trigger again, cause sometimes it will fail
+count=0
+until mka vendorimage || ((count++ >= 5)); do echo "Vendor image build failed. Number of tries left: ${count}"; done
 simg2img "$HALIUM/out/target/product/$deviceinfo_android_target/vendor.img" "$TMPDOWN/partitions/vendor.img"
