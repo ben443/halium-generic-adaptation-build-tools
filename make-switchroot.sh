@@ -88,7 +88,18 @@ else
 fi
 
 zerofree "$OUT/partitions/rootfs.img"
+
 mv "$OUT/partitions/rootfs.img" "$OUT/partitions/android-rootfs.img" "$OUT/partitions/vendor.img" "$TMPMOUNT"
+
+dd if=/dev/zero bs=1G count=1 >> "$TMPMOUNT/android-rootfs.img"
+e2fsck -fy "$TMPMOUNT/android-rootfs.img"
+resize2fs "$TMPMOUNT/android-rootfs.img"
+
+TMPSYS=$(mktemp -d)
+mount "$TMPMOUNT/android-rootfs.img" "$TMPSYS"
+cp -r "${HERE}/tmp/system/lib/" "$TMPSYS/system/"
+umount "$TMPSYS"
+
 virt-make-fs --size=+256M -t ext4 --label "UDA" "$TMPMOUNT" "$OUT/partitions/uda.img"
 zerofree "$OUT/partitions/uda.img"
 split -b4290772992 --numeric-suffixes=0 "$OUT/partitions/uda.img" "$OUT/switchroot/install/l4t."

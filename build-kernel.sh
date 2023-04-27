@@ -33,10 +33,8 @@ fi
 cd "$KERNEL_DIR"
 make O="$OUT" $MAKEOPTS $deviceinfo_kernel_defconfig
 make O="$OUT" $MAKEOPTS -j$(nproc --all)
-if [ "$deviceinfo_kernel_disable_modules" != "true" ]
-then
-    make O="$OUT" $MAKEOPTS INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="$INSTALL_MOD_PATH" modules_install
-fi
+make O="$OUT" $MAKEOPTS INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="$INSTALL_MOD_PATH" modules_install
+find "$INSTALL_MOD_PATH" -name "*.ko" -type f -exec ${CROSS_COMPILE}strip --strip-debug {} \;
 
 ls "$OUT/arch/$ARCH/boot/"*Image*
 
