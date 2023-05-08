@@ -111,7 +111,7 @@ if [ "$deviceinfo_bootimg_header_version" -eq 2 ]; then
 fi
 
 if [ "$deviceinfo_bootimg_header_version" -eq 3 ]; then
-    EXTRA_ARGS+=" --base $deviceinfo_flash_offset_base --kernel_offset $deviceinfo_flash_offset_kernel --ramdisk_offset $deviceinfo_flash_offset_ramdisk"
+    EXTRA_ARGS+=" --base $deviceinfo_flash_offset_base"
 fi
 
 if [ -n "$deviceinfo_bootimg_board" ]; then
