@@ -187,6 +187,10 @@ if [ "$deviceinfo_bootimg_header_version" -eq 2 ]; then
     EXTRA_ARGS+=" --dtb $DTB --dtb_offset $deviceinfo_flash_offset_dtb"
 fi
 
+if [ "$deviceinfo_bootimg_header_version" -eq 3 ]; then
+    EXTRA_ARGS+=" --base $deviceinfo_flash_offset_base"
+fi
+
 if [ -n "$deviceinfo_bootimg_board" ]; then
     EXTRA_ARGS+=" --board $deviceinfo_bootimg_board"
 fi
