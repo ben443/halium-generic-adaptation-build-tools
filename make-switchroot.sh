@@ -87,9 +87,18 @@ else
 		"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210b01-frig.dtb" --id=0x46524947
 fi
 
-zerofree "$OUT/partitions/rootfs.img"
-
 mv "$OUT/partitions/rootfs.img" "$OUT/partitions/android-rootfs.img" "$OUT/partitions/vendor.img" "$TMPMOUNT"
+
+TMPROOT=$(mktemp -d)
+dd if=/dev/zero bs=1G count=1 >> "$TMPMOUNT/rootfs.img"
+e2fsck -fy "$TMPMOUNT/rootfs.img"
+resize2fs "$TMPMOUNT/rootfs.img"
+
+mount "$TMPMOUNT/rootfs.img" "${TMPROOT}"
+cp -av "${HERE}/overlay/system/opt/" "${TMPROOT}"
+umount "${TMPROOT}"
+
+zerofree "$TMPMOUNT/rootfs.img"
 
 dd if=/dev/zero bs=1G count=1 >> "$TMPMOUNT/android-rootfs.img"
 e2fsck -fy "$TMPMOUNT/android-rootfs.img"

@@ -29,10 +29,10 @@ else
 	./.repo/local_manifests/snack/snack.sh -y -p
 	hybris-patches/apply-patches.sh --mb
 	repo init --git-lfs
-        rm -rf external/chromium-webview/prebuilt/*
-        rm -rf .repo/projects/external/chromium-webview/prebuilt/*.git
-        rm -rf .repo/project-objects/LineageOS/android_external_chromium-webview_prebuilt_*.git
-        repo sync -j$(nproc) --force-sync
+	rm -rf external/chromium-webview/prebuilt/*
+	rm -rf .repo/projects/external/chromium-webview/prebuilt/*.git
+	rm -rf .repo/project-objects/LineageOS/android_external_chromium-webview_prebuilt_*.git
+	repo sync -j$(nproc) --force-sync
 fi
 
 # HACK: replace defconfig by deviceinfo one
@@ -44,8 +44,6 @@ lunch lineage_${deviceinfo_android_target}-userdebug
 
 # Build
 mka e2fsdroid
-count=0
-until mka systemimage || ((count++ >= 5)); do echo "System image build failed. Number of tries left: ${count}"; done
-count=0
-until mka vendorimage || ((count++ >= 5)); do echo "Vendor image build failed. Number of tries left: ${count}"; done
+mka systemimage
+mka vendorimage
 simg2img "$HALIUM/out/target/product/${deviceinfo_android_target}/vendor.img" "$TMPDOWN/partitions/vendor.img"
