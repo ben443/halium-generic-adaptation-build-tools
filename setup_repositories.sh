@@ -137,6 +137,18 @@ setup_tooling() {
             wget https://dl.google.com/developers/android/qt/images/gsi/vbmeta.img
         fi
     fi
+
+	if [ ! -f "mkdtimg" ]; then
+		wget https://android.googlesource.com/platform/system/libufdt/+archive/refs/heads/master/utils.tar.gz
+		tar xvf utils.tar.gz
+		cp src/mkdtboimg.py mkdtimg
+		chmod a+x mkdtimg
+		rm -rf utils.tar.gz tests src README.md
+	fi
+
+	ROOTFS_URL="https://ci.ubports.com/job/focal-hybris-rootfs-arm64/job/master/lastSuccessfulBuild/artifact/ubuntu-touch-android9plus-rootfs-arm64.tar.gz"
+	[ -f "${ROOTFS_URL##*/}" ] || wget $ROOTFS_URL
+	[ -d halium-install ] || git clone https://gitlab.com/Azkali/halium-install
 }
 
 setup_kernel() {
@@ -179,7 +191,7 @@ cd "$TMPDOWN"
     setup_clang
     setup_tooling
     setup_ramdisk
-    setup_kernel
+	[[ -z ${deviceinfo_kernel_uimage} ]] && setup_kernel
 
     ls .
 cd "$HERE"

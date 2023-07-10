@@ -56,6 +56,10 @@ if [ -n "$deviceinfo_kernel_apply_overlay" ] && $deviceinfo_kernel_apply_overlay
     "$SCRIPT/build-ufdt-apply-overlay.sh" "${TMPDOWN}"
 fi
 
+if [ ! -e "$TMPDOWN/lineage/out/target/product/${deviceinfo_android_target}/vendor.img" ]; then
+	"$SCRIPT/make-android-images.sh" "$TMPDOWN/lineage" "${TMP}"
+fi
+
 if $deviceinfo_kernel_clang_compile; then
     if [ -n "$deviceinfo_kernel_llvm_compile" ] && $deviceinfo_kernel_llvm_compile; then
         # Restrict available binaries in PATH to make builds less susceptible to host differences
@@ -85,9 +89,14 @@ if $deviceinfo_kernel_clang_compile; then
             PATH="$CLANG_PATH/bin:$GCC_PATH/bin:$GCC_ARM32_PATH/bin:${PATH}" \
             "$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system" "${MENUCONFIG}"
     fi
-else
+elif [[ -z "$deviceinfo_kernel_uimage" ]]; then
     PATH="$GCC_PATH/bin:$GCC_ARM32_PATH/bin:${PATH}" \
         "$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system" "${MENUCONFIG}"
+else
+	GCC_PATH="$TMPDOWN/lineage/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-gnu-6.4.1/"
+	GCC_ARM32_PATH="$TMPDOWN/lineage/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/"
+	PATH="$GCC_PATH/bin:$GCC_ARM32_PATH/bin:$TMPDOWN:${PATH}" \
+	"$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system" "${MENUCONFIG}" "${TMPDOWN}/lineage/kernel/$deviceinfo_android_kernel_path"
 fi
 
 # If deviceinfo_skip_dtbo_partition is set to true, do not copy an image for dedicated dtbo partition.
@@ -100,10 +109,17 @@ if [ -z "$deviceinfo_skip_dtbo_partition" ] || ! $deviceinfo_skip_dtbo_partition
     fi
 fi
 
-"$SCRIPT/make-bootimage.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMPDOWN}/halium-boot-ramdisk.img" \
-    "${TMP}/partitions/boot.img" "${TMP}/system"
-if [ "$ONLY_KERNEL" = "true" ]; then
-    exit 0
+ROOTFS_URL="https://ci.ubports.com/job/focal-hybris-rootfs-arm64/job/master/lastSuccessfulBuild/artifact/ubuntu-touch-android9plus-rootfs-arm64.tar.gz"
+"$TMPDOWN/halium-install/halium-install" -u phablet -l -o "${TMP}/partitions/" -p ut20.04 -s "${TMPDOWN}/${ROOTFS_URL##*/}" "${TMPDOWN}/lineage/out/target/product/$deviceinfo_android_target/system.img"
+
+if [ -n "$deviceinfo_kernel_uimage" ]; then
+	"$SCRIPT/make-switchroot.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMPDOWN}/halium-boot-ramdisk.img" "${TMP}" "$HERE/assets/"
+else
+	"$SCRIPT/make-bootimage.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMPDOWN}/halium-boot-ramdisk.img" \
+		"${TMP}/partitions/boot.img" "${TMP}/system"
+	if [ "$ONLY_KERNEL" = "true" ]; then
+		exit 0
+	fi
 fi
 
 cp -av overlay/* "${TMP}/"

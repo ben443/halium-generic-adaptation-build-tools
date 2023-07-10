@@ -7,8 +7,12 @@ MENUCONFIG=$3
 HERE=$(pwd)
 source "${HERE}/deviceinfo"
 
-KERNEL_DIR="${TMPDOWN}/$(basename "${deviceinfo_kernel_source}")"
-KERNEL_DIR="${KERNEL_DIR%.git}"
+if [[ -z ${deviceinfo_kernel_uimage} ]]; then
+	KERNEL_DIR="${TMPDOWN}/$(basename "${deviceinfo_kernel_source}")"
+	KERNEL_DIR="${KERNEL_DIR%.git}"
+else
+	KERNEL_DIR=$(realpath $4)
+fi
 OUT="${TMPDOWN}/KERNEL_OBJ"
 
 mkdir -p "$OUT"
@@ -36,6 +40,11 @@ if [ "$ARCH" == "arm64" ]; then
     : "${CROSS_COMPILE_ARM32:=arm-linux-androideabi-}"
     export CROSS_COMPILE_ARM32
 fi
+
+if [[ -n ${deviceinfo_kernel_uimage} ]]; then
+	export CROSS_COMPILE=${deviceinfo_arch}-linux-gnu-
+fi
+
 MAKEOPTS=""
 if [ -n "$CC" ]; then
     MAKEOPTS="CC=$CC"
