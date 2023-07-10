@@ -96,7 +96,9 @@ if [ -n "$deviceinfo_kernel_use_dtc_ext" ] && $deviceinfo_kernel_use_dtc_ext; th
     export DTC_EXT="$TMPDOWN/dtc_ext"
 fi
 
-"$SCRIPT/make-android-images.sh" "$TMPDOWN/halium" "${TMP}"
+if [[ ! -e "$TMPDOWN/halium//out/target/product/${deviceinfo_android_target}/vendor.img" ]]; then
+	"$SCRIPT/make-android-images.sh" "$TMPDOWN/halium" "${TMP}"
+fi
 
 PATH="$GCC_PATH/bin:$GC32_PATH/bin:$TMPDOWN:${PATH}" \
 "$SCRIPT/build-kernel.sh" "${TMPDOWN}" "${TMP}/system" "${TMPDOWN}/halium/kernel/$deviceinfo_android_kernel_path"
@@ -114,6 +116,8 @@ if [ -n "$deviceinfo_kernel_uimage" ]; then
 else
 	"$SCRIPT/make-bootimage.sh" "${TMPDOWN}" "${TMPDOWN}/KERNEL_OBJ" "${TMPDOWN}/halium-boot-ramdisk.img" "${TMP}/partitions/boot.img"
 fi
+
+exit
 
 cp -av overlay/* "${TMP}/"
 

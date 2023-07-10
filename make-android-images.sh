@@ -46,4 +46,4 @@ lunch lineage_${deviceinfo_android_target}-userdebug
 mka e2fsdroid
 mka systemimage
 mka vendorimage
-simg2img "$HALIUM/out/target/product/${deviceinfo_android_target}/vendor.img" "$TMPDOWN/partitions/vendor.img"
+# simg2img "$HALIUM/out/target/product/${deviceinfo_android_target}/vendor.img" "$TMPDOWN/partitions/vendor.img"

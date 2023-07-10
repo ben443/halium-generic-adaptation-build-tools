@@ -87,7 +87,8 @@ else
 		"$KERNEL_OBJ/arch/$ARCH/boot/dts/tegra210b01-frig.dtb" --id=0x46524947
 fi
 
-mv "$OUT/partitions/rootfs.img" "$OUT/partitions/android-rootfs.img" "$OUT/partitions/vendor.img" "$TMPMOUNT"
+mv "$OUT/partitions/rootfs.img" "$OUT/partitions/android-rootfs.img" "$TMPMOUNT"
+mv "$OUT/halium/out/target/product/${deviceinfo_android_target}/vendor.img" "$OUT/switchroot/install"
 
 TMPROOT=$(mktemp -d)
 dd if=/dev/zero bs=1G count=1 >> "$TMPMOUNT/rootfs.img"
