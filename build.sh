@@ -56,9 +56,7 @@ if [ -n "$deviceinfo_kernel_apply_overlay" ] && $deviceinfo_kernel_apply_overlay
     "$SCRIPT/build-ufdt-apply-overlay.sh" "${TMPDOWN}"
 fi
 
-if [ ! -e "$TMPDOWN/lineage/out/target/product/${deviceinfo_android_target}/vendor.img" ]; then
-	"$SCRIPT/make-android-images.sh" "$TMPDOWN/lineage" "${TMP}"
-fi
+"$SCRIPT/make-android-images.sh" "$TMPDOWN/lineage" "${TMP}"
 
 if $deviceinfo_kernel_clang_compile; then
     if [ -n "$deviceinfo_kernel_llvm_compile" ] && $deviceinfo_kernel_llvm_compile; then

@@ -159,7 +159,7 @@ else
 fi
 
 mv "$OUT/partitions/rootfs.img" "$OUT/partitions/android-rootfs.img" "$TMPMOUNT"
-cp "$TMPDOWN/lineage/out/target/product/${deviceinfo_android_target}/vendor.img" "$OUT/switchroot/install"
+simg2img "$TMPDOWN/lineage/out/target/product/${deviceinfo_android_target}/vendor.img" "$OUT/switchroot/install/vendor.img"
 
 dd if=/dev/zero bs=1G count=1 >> "$TMPMOUNT/android-rootfs.img"
 e2fsck -fy "$TMPMOUNT/android-rootfs.img"
