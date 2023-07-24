@@ -8,7 +8,7 @@ HERE=$(pwd)
 source "${HERE}/deviceinfo"
 export PATCHDIR=$HALIUM/.repo/local_manifests/patches
 
-function applyPatches {
+applyPatches() {
     PATCHES_FILE=$1
     echo "Applying patches from $PATCHES_FILE"
 
@@ -28,7 +28,7 @@ function applyPatches {
     done < $PATCHES_FILE
 }
 
-function applyRepopicks {
+applyRepopicks() {
     REPOPICKS_FILE=$1
     echo "Applying repopicks from $REPOPICKS_FILE"
 
@@ -46,6 +46,19 @@ function applyRepopicks {
     done < $REPOPICKS_FILE
 }
 
+setup() { source build/envsetup.sh; }
+
+picks() {
+	setup
+	applyrepopicks $halium/.repo/local_manifests/picklist
+	applypatches $halium/.repo/local_manifests/patchlist
+}
+
+setup_lunch() {
+	setup
+	lunch lineage_${deviceinfo_android_target}-userdebug
+}
+
 function patch_tree {
 	cd "$HALIUM"
 
@@ -57,12 +70,7 @@ function patch_tree {
 	# Setup halium (Sync again)
 	./halium/devices/setup ${deviceinfo_android_target}
 
-	# Source envsetup
-	source build/envsetup.sh
-
-	# Apply NX patches and picks
-	applyRepopicks $HALIUM/.repo/local_manifests/picklist
-	applyPatches $HALIUM/.repo/local_manifests/patchlist
+	picks
 
 	# Apply hybris patches
 	hybris-patches/apply-patches.sh
@@ -85,15 +93,12 @@ else
 	patch_tree
 fi
 
-source build/envsetup.sh
-lunch lineage_${deviceinfo_android_target}-userdebug
-
+setup_lunch
 mka e2fsdroid
+mka systemimage
 
-if [[ ! -e ${HALIUM}/out/target/product/${deviceinfo_android_target}/system.img ]]; then
-	mka systemimage
-fi
-
-if [[ ! -e ${HALIUM}/out/target/product/${deviceinfo_android_target}/vendor.img ]]; then
-	mka vendorimage
-fi
+repo forall -c 'git clean -dfx && git reset --hard'
+sed -i 's/TARGET_KERNEL_CONFIG.*$/TARGET_KERNEL_CONFIG := '${deviceinfo_kernel_defconfig}'/g' device/${deviceinfo_manufacturer}/${deviceinfo_codename}/BoardConfig.mk
+picks
+setup_lunch
+mka vendorimage
