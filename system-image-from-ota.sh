@@ -284,6 +284,12 @@ do
                 sudo mv system/var/lib/lxc/android/system.img system/var/lib/lxc/android/android-rootfs.img
             fi
 
+            if [ -e "system/var/lib/lxc/android/android-rootfs.img" ]; then
+                dd if=/dev/zero bs=1M count=100 >> system/var/lib/lxc/android/android-rootfs.img
+                e2fsck -fy system/var/lib/lxc/android/android-rootfs.img
+                resize2fs system/var/lib/lxc/android/android-rootfs.img
+            fi
+
             # Move things to data
             cp partitions/* "$OUT" || true
             sudo rm -Rf partitions || true
