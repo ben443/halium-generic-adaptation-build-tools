@@ -50,8 +50,8 @@ setup() { source build/envsetup.sh; }
 
 picks() {
 	setup
-	applyrepopicks $halium/.repo/local_manifests/picklist
-	applypatches $halium/.repo/local_manifests/patchlist
+	applyRepopicks $HALIUM/.repo/local_manifests/picklist
+	applyPatches $HALIUM/.repo/local_manifests/patchlist
 }
 
 setup_lunch() {
@@ -64,35 +64,33 @@ function patch_tree {
 
 	# Get halium device manifest
 	if [[ ! -e ./halium/devices/${deviceinfo_manufacturer}_${deviceinfo_android_target}.xml ]]; then
-		wget -O ./halium/devices/${deviceinfo_manufacturer}_${deviceinfo_android_target}.xml https://gitlab.azka.li/l4t-community/ubtouch/manifest/-/raw/${deviceinfo_android_branch}/default.xml
-	fi
+	    wget -O ./halium/devices/${deviceinfo_manufacturer}_${deviceinfo_android_target}.xml https://gitlab.azka.li/l4t-community/ubtouch/manifest/-/raw/${deviceinfo_android_branch}/default.xml
+    fi
 
-	# Setup halium (Sync again)
-	./halium/devices/setup ${deviceinfo_android_target}
-
-	picks
-
-	# Apply hybris patches
-	hybris-patches/apply-patches.sh
-
-	# HACK: replace defconfig by deviceinfo one
-	sed -i 's/TARGET_KERNEL_CONFIG.*$/TARGET_KERNEL_CONFIG := '${deviceinfo_kernel_defconfig}'/g' device/${deviceinfo_manufacturer}/${deviceinfo_codename}/BoardConfig.mk
+    # Setup halium (Sync again)
+    ./halium/devices/setup ${deviceinfo_android_target}
+    picks
+    # Apply hybris patches
+    hybris-patches/apply-patches.sh
+    # HACK: replace defconfig by deviceinfo one
+    sed -i 's/TARGET_KERNEL_CONFIG.*$/TARGET_KERNEL_CONFIG := '${deviceinfo_kernel_defconfig}'/g' device/${deviceinfo_manufacturer}/${deviceinfo_codename}/BoardConfig.mk
 }
 
 if [ ! -d "$HALIUM" ]; then
-	mkdir -p "$HALIUM"
-	cd "$HALIUM"
-	repo init --git-lfs --depth=1	-u https://github.com/Halium/android -b ${deviceinfo_android_branch}
-	repo sync -j$(nproc)
-	git clone https://gitlab.azka.li/l4t-community/ubtouch/manifest.git --recursive -b ${deviceinfo_android_branch} .repo/local_manifests
-	patch_tree
+    mkdir -p "$HALIUM"
+    cd "$HALIUM"
+    repo init --git-lfs --depth=1	-u https://github.com/Halium/android -b ${deviceinfo_android_branch}
+    repo sync -j$(nproc)
+    git clone https://gitlab.azka.li/l4t-community/ubtouch/manifest.git --recursive -b ${deviceinfo_android_branch} .repo/local_manifests
+    patch_tree
 else
-	cd "$HALIUM"
-	repo forall -c 'git clean -dfx && git reset --hard'
-	repo sync -j$(nproc) --force-sync
-	patch_tree
+    cd "$HALIUM"
+    repo forall -c 'git clean -dfx && git reset --hard'
+    repo sync -j$(nproc) --force-sync
+    patch_tree
 fi
 
+cd "$HALIUM"
 setup_lunch
 mka e2fsdroid
 mka systemimage

@@ -16,6 +16,7 @@ do
     (-c) ONLY_CLONE="true";;
     (-k) ONLY_KERNEL="true";;
     (-m) MENUCONFIG="true";;
+    (-s) SKIP_ANDROID="true";;
     (-*) echo "$0: Error: unknown option $1" 1>&2; exit 1;;
     (*) OUT="$2"; break;;
     esac
@@ -56,7 +57,9 @@ if [ -n "$deviceinfo_kernel_apply_overlay" ] && $deviceinfo_kernel_apply_overlay
     "$SCRIPT/build-ufdt-apply-overlay.sh" "${TMPDOWN}"
 fi
 
-"$SCRIPT/make-android-images.sh" "$TMPDOWN/lineage" "${TMP}"
+if [ "$SKIP_ANDROID" = "true" ]; then
+    "$SCRIPT/make-android-images.sh" "$TMPDOWN/lineage" "${TMP}"
+fi
 
 if $deviceinfo_kernel_clang_compile; then
     if [ -n "$deviceinfo_kernel_llvm_compile" ] && $deviceinfo_kernel_llvm_compile; then
